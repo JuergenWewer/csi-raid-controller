@@ -5,20 +5,24 @@ go env
 
 generate the binary: controller
 
+cd controller
 make
+#cd ..
 
 if it's not installed:
 go get -u github.com/tcnksm/ghr
 
-git tag -a v0.0.2 -m "Release description"
+# das ist wohl überflüssig - wohl doch nicht
+git tag -a v0.0.6 -m "cd dir controller"
 git push --tags
 
+juergen.wewer@gmail.com
 
-export GITHUB_TOKEN=2aebdcc42a24511cc8570b50b01b756b9f75f49e
-export TAG=v0.0.1
+export GITHUB_TOKEN= <see in diary: git token jw>
+export TAG=v0.0.6
 
 push the release to the repository:
 ~/go/bin/ghr -t $GITHUB_TOKEN -r csi-raid-controller --replace --draft  $TAG controller
 
 
-https://api.github.com/repos/JuergenWewer/storage-lib-external-provisioner/releases
+https://api.github.com/repos/JuergenWewer/csi-raid-controller/releases
