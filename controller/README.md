@@ -27,8 +27,9 @@ require (
 )
 ```
 
+cd ..
 git add .
-git commit -m "first klog create volume"
+git commit -m "klog info create volume"
 git push
 
 if it's not installed:
@@ -36,15 +37,6 @@ go get -u github.com/tcnksm/ghr
 
 git tag -a v0.0.10 -m "first klog create volume"
 git push --tags
-
-# Make sure the current code is all checked in
-git commit -am 'Ready for release v0.0.11'
-# Now tag it
-git tag v0.0.11
-# Push the tag
-git push origin v0.0.11
-# Push the code
-git push
 
 export GITHUB_TOKEN= <see in diary: git token jw>
 export TAG=v0.0.10
