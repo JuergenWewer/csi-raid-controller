@@ -1,14 +1,15 @@
-cd <projectHomePath eg. csi-raid-controller>
-pwd -> csi-raid-controller
+# cd <projectHomePath eg. csi-raid-controller>
+# pwd -> csi-raid-controller
 go mod init github.com/JuergenWewer/csi-raid-controller/controller
-will generate:
+#will generate:
 csi-raid-controller/go.mod
 
-to show go variables:
+# to show go variables:
 go env
 
+# to deploy a new version to github repository
 git add .
-git commit -m "jhjhjhj"
+git commit -m "first klog create volume"
 git push
 
 generate the binary: controller

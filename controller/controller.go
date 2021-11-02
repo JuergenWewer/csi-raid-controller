@@ -1349,6 +1349,7 @@ func (ctrl *ProvisionController) provisionClaimOperation(ctx context.Context, cl
 
 	ctrl.eventRecorder.Event(claim, v1.EventTypeNormal, "Provisioning", fmt.Sprintf("External provisioner is provisioning volume for claim %q", claimToClaimKey(claim)))
 
+	klog.Info("csi-controller start to create volume")
 	volume, result, err := ctrl.provisioner.Provision(ctx, options)
 	if err != nil {
 		if ierr, ok := err.(*IgnoredError); ok {
