@@ -1,18 +1,7 @@
-# cd <projectHomePath eg. csi-raid-controller>
-# pwd -> csi-raid-controller
-go mod init github.com/JuergenWewer/csi-raid-controller/controller
+# Initialise the project
+go mod init github.com/JuergenWewer/csi-raid-controller
 # will generate:
 csi-raid-controller/go.mod
-
-# to show go variables:
-go env
-
-# to deploy a new version to github repository
-generate the binary: controller
-
-cd controller
-make
-
 # if  the erros: module k8s.io/api@latest found (v0.22.3), but does not contain package k8s.io/api/batch/v2alpha1 appear check go.mod
 # it should contain:
 ```
@@ -27,22 +16,25 @@ require (
 )
 ```
 
-cd ..
+# to deploy a new version v0.0.47 to github repository
+## checkout the master branch
+git checkout master
+git pull
+
+## create a new branch named as the version
+git checkout -b "v0.0.47"
+
+##make the modifications
+...
+
+#generate the binary: controller
+make
+
+#push the branch to github
 git add .
-git commit -m "klog info create volume"
-git push
-
-if it's not installed:
-go get -u github.com/tcnksm/ghr
-
-git tag -a v0.0.12 -m "first klog create volume"
-git push --tags
-
-export GITHUB_TOKEN= <see in diary: git token jw>
-export TAG=v0.0.12
-
-push the release to the repository:
-~/go/bin/ghr -t $GITHUB_TOKEN -r csi-raid-controller --replace --draft  $TAG controller
+git commit -m "release v0.0.47"
+git push --set-upstream origin v0.0.47
 
 
-https://api.github.com/repos/JuergenWewer/csi-raid-controller/releases
+# Hints: to show go variables:
+go env
