@@ -35,11 +35,11 @@ git push
 if it's not installed:
 go get -u github.com/tcnksm/ghr
 
-git tag -a v0.0.10 -m "first klog create volume"
+git tag -a v0.0.12 -m "first klog create volume"
 git push --tags
 
 export GITHUB_TOKEN= <see in diary: git token jw>
-export TAG=v0.0.10
+export TAG=v0.0.12
 
 push the release to the repository:
 ~/go/bin/ghr -t $GITHUB_TOKEN -r csi-raid-controller --replace --draft  $TAG controller
