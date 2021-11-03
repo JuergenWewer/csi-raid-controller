@@ -14,4 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package csi-raid-controller // import "github.com/JuergenWewer/csi-raid-controller"
+package csiraidcontroller // import "github.com/JuergenWewer/csi-raid-controller"
