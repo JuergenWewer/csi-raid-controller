@@ -1,4 +1,4 @@
-module github.com/JuergenWewer/csi-raid-controller/controller
+module github.com/JuergenWewer/csi-raid-controller
 
 go 1.15
 
