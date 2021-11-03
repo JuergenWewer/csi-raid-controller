@@ -1,9 +1,9 @@
 # Initialise the project
 go mod init github.com/JuergenWewer/csi-raid-controller
-# will generate:
+## will generate:
 csi-raid-controller/go.mod
-# if  the erros: module k8s.io/api@latest found (v0.22.3), but does not contain package k8s.io/api/batch/v2alpha1 appear check go.mod
-# it should contain:
+## if  the erros: module k8s.io/api@latest found (v0.22.3), but does not contain package k8s.io/api/batch/v2alpha1 appear check go.mod
+## it should contain:
 ```
 require (
     github.com/prometheus/client_golang v1.11.0
@@ -24,17 +24,46 @@ git pull
 ## create a new branch named as the version
 git checkout -b "v0.0.47"
 
-##make the modifications
+## make the modifications
 ...
 
-#generate the binary: controller
+## generate the binary: controller
 make
 
-#push the branch to github
+## push the branch to github
 git add .
 git commit -m "release v0.0.47"
 git push --set-upstream origin v0.0.47
 
+## merge the release branch back into the master
+git checkout master
+git pull
+git merge v0.0.47
+git push
+
+# use the csiraidcontroller in other go projects with version v0.0.47
+in the .go file:
+```
+package main
+import (
+    ...
+    "github.com/JuergenWewer/csi-raid-controller"
+    ...
+)
+```
+in the go.mod file enter:
+
+```
+module github.com/kubernetes-sigs/csi-raid
+
+go 1.14
+
+require (
+    github.com/JuergenWewer/csi-raid-controller v0.0.47
+    ...
+    )
+```
+    
 
 # Hints: to show go variables:
 go env
