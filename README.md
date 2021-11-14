@@ -65,5 +65,23 @@ require (
 ```
     
 
-# Hints: to show go variables:
+# go Hints
+## show go variables:
 go env
+## run go application - main package is required
+go run csiraidcontroller.go
+## test the application
+go test
+
+
+# setup intellij for go
+## import go plugin
+## preferences/language & Feature/ go/ go module set
+GOENV=/Users/wewer/Library/Application Support/go/env;GOMODCACHE=/Users/wewer/go/pkg/mod;GOPATH=/Users/wewer/go;GOCACHE=/Users/wewer/Library/Caches/go-build;GO111MODULE=on
+
+## in shell environment the following env variables shoul be set
+export GOMODCACHE=/Users/wewer/go/pkg/mod
+export GOENV="/Users/wewer/Library/Application Support/go/env"
+export GOPATH=/Users/wewer/go
+export GO111MODULE=on
+export GOCACHE=/Users/wewer/Library/Caches/go-build

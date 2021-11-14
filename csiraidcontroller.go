@@ -31,6 +31,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	_ "github.com/rclone/rclone/backend/drive"
+	_ "github.com/rclone/rclone/backend/local"
+	_ "github.com/rclone/rclone/fs"
+	_ "github.com/rclone/rclone/fs/config"
+	_ "github.com/rclone/rclone/fs/sync"
 	"golang.org/x/time/rate"
 	v1 "k8s.io/api/core/v1"
 	storage "k8s.io/api/storage/v1"
@@ -805,10 +810,13 @@ func (ctrl *ProvisionController) forgetVolume(obj interface{}) {
 	ctrl.volumeQueue.Done(key)
 }
 
+
 // Run starts all of this controller's control loops
 func (ctrl *ProvisionController) Run(ctx context.Context) {
 	run := func(ctx context.Context) {
 		klog.Infof("Starting csi-raid provisioner controller %s!", ctrl.component)
+
+		csisync(ctx,"./sourcetest", "remotetest:/mnt")
 		defer utilruntime.HandleCrash()
 		defer ctrl.claimQueue.ShutDown()
 		defer ctrl.volumeQueue.ShutDown()
