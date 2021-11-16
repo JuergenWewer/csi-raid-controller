@@ -27,7 +27,14 @@ import (
 )
 
 func csisync(ctx context.Context, sourceDir string, destDir string) {
-	fmt.Println("csisync called")
+	fmt.Printf("csisync called source: %s  destination: %s \n", sourceDir, destDir)
+
+	if len(destDir) == 0 {
+		return
+	}
+	if len(sourceDir) == 0 {
+		return
+	}
 
 	var fsrc fs.Fs
 	var fdst fs.Fs

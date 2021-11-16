@@ -214,6 +214,7 @@ const (
 )
 
 var errRuntime = fmt.Errorf("cannot call option functions after controller has Run")
+var remotePath string
 
 // ResyncPeriod is how often the controller relists PVCs, PVs, & storage
 // classes. OnUpdate will be called even if nothing has changed, meaning failed
@@ -815,8 +816,9 @@ func (ctrl *ProvisionController) forgetVolume(obj interface{}) {
 func (ctrl *ProvisionController) Run(ctx context.Context) {
 	run := func(ctx context.Context) {
 		klog.Infof("Starting csi-raid provisioner controller %s!", ctrl.component)
-
-		csisync(ctx,"./sourcetest", "remotetest:/mnt")
+		//ctrl.provisioner.server
+		//ctrl.provisioner.path
+		//csisync(ctx,"./sourcetest", "remotetest:/mnt")
 		defer utilruntime.HandleCrash()
 		defer ctrl.claimQueue.ShutDown()
 		defer ctrl.volumeQueue.ShutDown()
@@ -1075,6 +1077,13 @@ func (ctrl *ProvisionController) syncClaim(ctx context.Context, obj interface{})
 			switch err {
 			case nil:
 				klog.V(5).Infof("Claim processing succeeded, removing PVC %s from claims in progress", claim.UID)
+				pvName := ctrl.getProvisionedVolumeNameForClaim(claim)
+				//ctrl.provisioner.server
+				//ctrl.provisioner.path
+				//csisync(ctx,"./sourcetest", "remotetest:/mnt")
+				remotePath = ctrl.provisioner.GetRemote()
+
+				csisync(ctx,pvName, remotePath)
 			case errStopProvision:
 				klog.V(5).Infof("Stop provisioning, removing PVC %s from claims in progress", claim.UID)
 				// Our caller would requeue if we pass on this special error; return nil instead.

@@ -3,6 +3,7 @@ module github.com/JuergenWewer/csi-raid-controller
 go 1.15
 
 require (
+	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/rclone/rclone v1.57.0
