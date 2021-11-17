@@ -819,6 +819,8 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 		//ctrl.provisioner.server
 		//ctrl.provisioner.path
 		//csisync(ctx,"./sourcetest", "remotetest:/mnt")
+		remotePath = ctrl.provisioner.GetRemote()
+		klog.Infof("csi-raid provisioner remotePath %s", remotePath)
 		defer utilruntime.HandleCrash()
 		defer ctrl.claimQueue.ShutDown()
 		defer ctrl.volumeQueue.ShutDown()
@@ -1081,7 +1083,7 @@ func (ctrl *ProvisionController) syncClaim(ctx context.Context, obj interface{})
 				//ctrl.provisioner.server
 				//ctrl.provisioner.path
 				//csisync(ctx,"./sourcetest", "remotetest:/mnt")
-				remotePath = ctrl.provisioner.GetRemote()
+				//remotePath = ctrl.provisioner.GetRemote()
 
 				csisync(ctx,pvName, remotePath)
 			case errStopProvision:
