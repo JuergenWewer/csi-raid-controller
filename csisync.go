@@ -24,7 +24,7 @@ import (
 	"github.com/rclone/rclone/fs/config/configfile"
 )
 
-func csisync(ctx context.Context, source string, target string, directory string) {
+func csisync(ctx context.Context, source string, target string, directory string, namespace string, name string) {
 	fmt.Printf("csisync called source: %s, target: %s, directory: %s \n", source, target, directory)
 
 	if len(source) == 0 {
@@ -43,8 +43,8 @@ func csisync(ctx context.Context, source string, target string, directory string
 	//fsrc, _ = NewFsFile(sourceDir)
 	//fmt.Printf("NewFsFile - f: %s \n", fsrc)
 
-	fsrc = newFsDir(ctx, source, directory)
-	fdst = newFsDir(ctx, target, directory)
+	fsrc = newFsDir(ctx, source, directory, namespace, name)
+	fdst = newFsDir(ctx, target, directory, namespace, name)
 
 	fmt.Printf("fsrc: %s \n", fsrc)
 	fmt.Printf("fdst: %s \n", fdst)
@@ -86,7 +86,7 @@ func NewFsFile(remote string) (fs.Fs, string) {
 	return nil, ""
 }
 
-func newFsDir(ctx context.Context, remote string, directory string) fs.Fs {
+func newFsDir(ctx context.Context, remote string, directory string, namespace string, name string) fs.Fs {
 	fmt.Printf("newFsDir - config.GetConfigPath(): %s \n", config.GetConfigPath())
 	fmt.Printf("newFsDir - config.Data().GetSectionList(): %s \n", config.Data().GetSectionList())
 	path, _ := config.Data().GetValue(remote,"path")
@@ -99,7 +99,7 @@ func newFsDir(ctx context.Context, remote string, directory string) fs.Fs {
 	//res, _ := config.Get("user")
 	//fmt.Printf("newFsDir - fs.ConfigFs - config: %s \n", res)
 
-	fsource, err := fs.NewFs(context.Background(),remote +":"+path+"/"+directory)
+	fsource, err := fs.NewFs(context.Background(),remote +":"+path+"/"+ namespace + "-" + name + "-" +directory)
 	if err != nil {
 		err = fs.CountError(err)
 		fmt.Printf("fs.NewFs Failed to create file system for %q: %v \n", remote, err)
