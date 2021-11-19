@@ -5,8 +5,6 @@ import (
 	//"fmt"
 	//"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
-	"github.com/rclone/rclone/fs/sync"
-
 	//"github.com/rclone/rclone/fs/config"
 	//"github.com/rclone/rclone/fs/fspath"
 	//"log"
@@ -26,13 +24,13 @@ import (
 	"github.com/rclone/rclone/fs/config/configfile"
 )
 
-func csisync(ctx context.Context, sourceDir string, destDir string) {
-	fmt.Printf("csisync called source: %s  destination: %s \n", sourceDir, destDir)
+func csisync(ctx context.Context, source string, target string, directory string) {
+	fmt.Printf("csisync called source: %s, target: %s, directory: %s \n", source, target, directory)
 
-	if len(destDir) == 0 {
+	if len(source) == 0 {
 		return
 	}
-	if len(sourceDir) == 0 {
+	if len(target) == 0 {
 		return
 	}
 
@@ -40,11 +38,13 @@ func csisync(ctx context.Context, sourceDir string, destDir string) {
 	var fdst fs.Fs
 
 	configfile.Install()
+	config.SetConfigPath("/csiraid.config")
 
-	fsrc, _ = NewFsFile(sourceDir)
-	fmt.Printf("NewFsFile - f: %s \n", fsrc)
+	//fsrc, _ = NewFsFile(sourceDir)
+	//fmt.Printf("NewFsFile - f: %s \n", fsrc)
 
-	fdst = newFsDir(ctx, destDir)
+	fsrc = newFsDir(ctx, source, directory)
+	fdst = newFsDir(ctx, target, directory)
 
 	fmt.Printf("fsrc: %s \n", fsrc)
 	fmt.Printf("fdst: %s \n", fdst)
@@ -52,11 +52,16 @@ func csisync(ctx context.Context, sourceDir string, destDir string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(entries)
-	err1 := sync.Sync(context.Background(), fdst, fsrc, true)
-	if err1 != nil {
-		log.Fatal(err1)
+	fmt.Printf("source entries: %s", entries)
+	entries, err = fdst.List(context.Background(), "")
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Printf("target entries: %s", entries)
+	//err1 := sync.Sync(context.Background(), fdst, fsrc, true)
+	//if err1 != nil {
+	//	log.Fatal(err1)
+	//}
 	fmt.Println("copy done")
 }
 
@@ -81,13 +86,12 @@ func NewFsFile(remote string) (fs.Fs, string) {
 	return nil, ""
 }
 
-func newFsDir(ctx context.Context,remote string) fs.Fs {
-	//f, err := cache.Get(nil, remote)
-	//dir, file = config.
-	config.SetConfigPath("/Users/wewer/.config/rclone/rclone.conf")
+func newFsDir(ctx context.Context, remote string, directory string) fs.Fs {
 	fmt.Printf("newFsDir - config.GetConfigPath(): %s \n", config.GetConfigPath())
-	config.Data().GetSectionList()
 	fmt.Printf("newFsDir - config.Data().GetSectionList(): %s \n", config.Data().GetSectionList())
+	path, _ := config.Data().GetValue(remote,"path")
+	fmt.Printf("newFsDir - config.Data().GetValue(remote,\"path\"): %s \n", path)
+	config.Data().GetValue(remote,"path")
 	//fsInfo, configName, fsPath, config, err := fs.ConfigFs(remote)
 	//fmt.Printf("newFsDir - fs.ConfigFs - fsInfo: %s \n", fsInfo.Name)
 	//fmt.Printf("newFsDir - fs.ConfigFs - configName: %s \n", configName)
@@ -95,7 +99,7 @@ func newFsDir(ctx context.Context,remote string) fs.Fs {
 	//res, _ := config.Get("user")
 	//fmt.Printf("newFsDir - fs.ConfigFs - config: %s \n", res)
 
-	fsource, err := fs.NewFs(context.Background(),remote)
+	fsource, err := fs.NewFs(context.Background(),remote +":"+path+"/"+directory)
 	if err != nil {
 		err = fs.CountError(err)
 		fmt.Printf("fs.NewFs Failed to create file system for %q: %v \n", remote, err)

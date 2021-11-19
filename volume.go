@@ -44,7 +44,8 @@ type Provisioner interface {
 	// May return IgnoredError to indicate that the call has been ignored and no
 	// action taken.
 	Delete(context.Context, *v1.PersistentVolume) error
-	GetRemote() string
+	GetSource() string
+	GetTarget() string
 }
 
 // Qualifier is an optional interface implemented by provisioners to determine

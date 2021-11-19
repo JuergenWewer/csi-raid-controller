@@ -112,6 +112,7 @@ type ProvisionController struct {
 	// volume-specific options and such that it needs in order to provision
 	// volumes.
 	provisioner Provisioner
+	remotePath string
 
 	claimInformer  cache.SharedIndexInformer
 	claimsIndexer  cache.Indexer
@@ -214,7 +215,9 @@ const (
 )
 
 var errRuntime = fmt.Errorf("cannot call option functions after controller has Run")
-var remotePath string
+var RemotePath string
+var Source string
+var Target string
 
 // ResyncPeriod is how often the controller relists PVCs, PVs, & storage
 // classes. OnUpdate will be called even if nothing has changed, meaning failed
@@ -819,8 +822,10 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 		//ctrl.provisioner.server
 		//ctrl.provisioner.path
 		//csisync(ctx,"./sourcetest", "remotetest:/mnt")
-		remotePath = ctrl.provisioner.GetRemote()
-		klog.Infof("csi-raid provisioner remotePath %s", remotePath)
+		Source = ctrl.provisioner.GetSource()
+		Target = ctrl.provisioner.GetTarget()
+		//remotePath = ctrl.provisioner.GetRemote()
+		klog.Infof("csi-raid provisioner remotePath %s", RemotePath)
 		defer utilruntime.HandleCrash()
 		defer ctrl.claimQueue.ShutDown()
 		defer ctrl.volumeQueue.ShutDown()
@@ -1079,13 +1084,12 @@ func (ctrl *ProvisionController) syncClaim(ctx context.Context, obj interface{})
 			switch err {
 			case nil:
 				klog.V(5).Infof("Claim processing succeeded, removing PVC %s from claims in progress", claim.UID)
-				pvName := ctrl.getProvisionedVolumeNameForClaim(claim)
+				//pvName := ctrl.getProvisionedVolumeNameForClaim(claim)
 				//ctrl.provisioner.server
 				//ctrl.provisioner.path
 				//csisync(ctx,"./sourcetest", "remotetest:/mnt")
 				//remotePath = ctrl.provisioner.GetRemote()
 
-				csisync(ctx,pvName, remotePath)
 			case errStopProvision:
 				klog.V(5).Infof("Stop provisioning, removing PVC %s from claims in progress", claim.UID)
 				// Our caller would requeue if we pass on this special error; return nil instead.
@@ -1421,6 +1425,7 @@ func (ctrl *ProvisionController) provisionClaimOperation(ctx context.Context, cl
 	volume.Spec.StorageClassName = claimClass
 
 	klog.Info(logOperation(operation, "succeeded"))
+	csisync(ctx, Source, Target, pvName)
 
 	if err := ctrl.volumeStore.StoreVolume(claim, volume); err != nil {
 		return ProvisioningFinished, err
