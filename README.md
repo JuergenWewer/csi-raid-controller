@@ -26,6 +26,7 @@ git checkout -b "v0.0.47"
 
 ## make the modifications
 ...
+delete controller
 
 ## generate the binary: controller
 make
