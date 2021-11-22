@@ -5,6 +5,8 @@ import (
 	//"fmt"
 	//"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
+	"github.com/rclone/rclone/fs/sync"
+
 	//"github.com/rclone/rclone/fs/config"
 	//"github.com/rclone/rclone/fs/fspath"
 	//"log"
@@ -12,6 +14,7 @@ import (
 
 	"context"
 	"fmt"
+	"time"
 	"github.com/rclone/rclone/fs/fspath"
 	"log"
 	"path"
@@ -48,21 +51,25 @@ func csisync(ctx context.Context, source string, target string, directory string
 
 	fmt.Printf("fsrc: %s \n", fsrc)
 	fmt.Printf("fdst: %s \n", fdst)
-	entries, err := fsrc.List(context.Background(), "")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("source entries: %s", entries)
-	entries, err = fdst.List(context.Background(), "")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("target entries: %s", entries)
-	//err1 := sync.Sync(context.Background(), fdst, fsrc, true)
-	//if err1 != nil {
-	//	log.Fatal(err1)
+	//entries, err := fsrc.List(context.Background(), "")
+	//if err != nil {
+	//	log.Fatal(err)
 	//}
-	fmt.Println("copy done")
+	//fmt.Printf("source entries: %s", entries)
+	//entries, err = fdst.List(context.Background(), "")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Printf("target entries: %s", entries)
+	ticker := time.NewTicker(1 * time.Second)
+	for _ = range ticker.C {
+		fmt.Println("tock")
+		err1 := sync.Sync(context.Background(), fdst, fsrc, true)
+		if err1 != nil {
+			log.Fatal(err1)
+		}
+		fmt.Println("sync done")
+	}
 }
 
 func NewFsFile(remote string) (fs.Fs, string) {
