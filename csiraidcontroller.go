@@ -1424,7 +1424,7 @@ func (ctrl *ProvisionController) provisionClaimOperation(ctx context.Context, cl
 	volume.Spec.StorageClassName = claimClass
 
 	klog.Info(logOperation(operation, "succeeded"))
-	csisync(ctx, Source, Target, pvName, claim.Namespace ,claim.Name)
+	go csisync(ctx, Source, Target, pvName, claim.Namespace ,claim.Name)
 
 	if err := ctrl.volumeStore.StoreVolume(claim, volume); err != nil {
 		return ProvisioningFinished, err
