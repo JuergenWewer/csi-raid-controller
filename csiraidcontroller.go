@@ -215,7 +215,6 @@ const (
 )
 
 var errRuntime = fmt.Errorf("cannot call option functions after controller has Run")
-var RemotePath string
 var Source string
 var Target string
 
@@ -819,13 +818,21 @@ func (ctrl *ProvisionController) forgetVolume(obj interface{}) {
 func (ctrl *ProvisionController) Run(ctx context.Context) {
 	run := func(ctx context.Context) {
 		klog.Infof("Starting csi-raid provisioner controller %s!", ctrl.component)
+
+		pods, err := ctrl.client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
+		fmt.Printf("csi-raid provisioner: There are %d pods in the cluster\n", len(pods.Items))
+
+
 		//ctrl.provisioner.server
 		//ctrl.provisioner.path
 		//csisync(ctx,"./sourcetest", "remotetest:/mnt")
 		Source = ctrl.provisioner.GetSource()
 		Target = ctrl.provisioner.GetTarget()
 		//remotePath = ctrl.provisioner.GetRemote()
-		klog.Infof("csi-raid provisioner remotePath %s", RemotePath)
+		klog.Infof("csi-raid provisioner Source: %s Target: %s", Source, Target)
 		defer utilruntime.HandleCrash()
 		defer ctrl.claimQueue.ShutDown()
 		defer ctrl.volumeQueue.ShutDown()
