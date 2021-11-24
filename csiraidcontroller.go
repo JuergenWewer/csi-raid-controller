@@ -54,6 +54,7 @@ import (
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/tools/record"
+	//_ "k8s.io/client-go/listers/storage/v1beta1"
 	ref "k8s.io/client-go/tools/reference"
 	"k8s.io/client-go/util/workqueue"
 	klog "k8s.io/klog/v2"
@@ -813,17 +814,53 @@ func (ctrl *ProvisionController) forgetVolume(obj interface{}) {
 	ctrl.volumeQueue.Done(key)
 }
 
+// List lists all StorageClasses in the indexer.
+//func (s *storageClassLister) List(selector labels.Selector) (ret []*storage.StorageClass, err error) {
+//	// create the ingress watcher
+//	// create the ingress watcher
+//	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
+//		ret = append(ret, m.(*storage.StorageClass))
+//	})
+//	return ret, err
+//}
 
 // Run starts all of this controller's control loops
 func (ctrl *ProvisionController) Run(ctx context.Context) {
 	run := func(ctx context.Context) {
 		klog.Infof("Starting csi-raid provisioner controller %s!", ctrl.component)
 
+		//kubernetes clientset = ctrl.client
+		//ctrl.client.AppsV1beta1().RESTClient().Get().Resource("storageclass")
+		// create the ingress watcher
+
+		//ingressListWatcher := cache.NewListWatchFromClient(ctrl.client.ExtensionsV1beta1().RESTClient(),
+		//	"ingresses",
+		//	v1.NamespaceAll,
+		//	fields.Everything())
+
+		// create the indexer & informer framework
+		//indexer, informer := cache.NewIndexerInformer(ingressListWatcher,
+		//	&v1beta1.Ingress{},
+		//	0,
+		//	cache.ResourceEventHandlerFuncs{},
+		//	cache.Indexers{
+		//		provider.ATS:   helper.GetProviderByName(provider.ATS).DomainsIndexFunc,
+		//		provider.Istio: helper.GetProviderByName(provider.Istio).DomainsIndexFunc,
+		//	})
+
+		storageList, err := ctrl.client.StorageV1().StorageClasses().List(ctx,metav1.ListOptions{})
+		fmt.Printf("my name: %d \n", ctrl.provisionerName)
+		fmt.Printf("storageClasses: %d \n", len(storageList.Items))
+		for index, element := range storageList.Items {
+			// index is the index where we are
+			// element is the element from someSlice for where we are
+			fmt.Printf("storageClass: %d provisioner: %s storageClass: %s \n", index, element.Provisioner, element.ObjectMeta.Name )
+		}
 		pods, err := ctrl.client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
 			panic(err.Error())
 		}
-		fmt.Printf("csi-raid provisioner: There are %d pods in the cluster\n", len(pods.Items))
+		klog.Infof("csi-raid provisioner: There are %d pods in the cluster\n", len(pods.Items))
 
 
 		//ctrl.provisioner.server

@@ -14,10 +14,10 @@ import (
 
 	"context"
 	"fmt"
-	"time"
 	"github.com/rclone/rclone/fs/fspath"
 	"log"
 	"path"
+	"time"
 
 	_ "github.com/rclone/rclone/backend/drive"
 	_ "github.com/rclone/rclone/backend/local"
