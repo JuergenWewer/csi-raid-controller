@@ -848,19 +848,38 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 		//		provider.Istio: helper.GetProviderByName(provider.Istio).DomainsIndexFunc,
 		//	})
 
-		storageList, err := ctrl.client.StorageV1().StorageClasses().List(ctx,metav1.ListOptions{})
-		fmt.Printf("my name: %d \n", ctrl.provisionerName)
-		fmt.Printf("storageClasses: %d \n", len(storageList.Items))
-		for index, element := range storageList.Items {
+		storageClassList, err := ctrl.client.StorageV1().StorageClasses().List(ctx,metav1.ListOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
+		fmt.Printf("my name: %s \n", ctrl.provisionerName)
+		fmt.Printf("storageClasses: %d \n", len(storageClassList.Items))
+		for index, storageClass := range storageClassList.Items {
 			// index is the index where we are
 			// element is the element from someSlice for where we are
-			fmt.Printf("storageClass: %d provisioner: %s storageClass: %s \n", index, element.Provisioner, element.ObjectMeta.Name )
+			fmt.Printf("storageClass: %d provisioner: %s storageClass: %s \n", index, storageClass.Provisioner, storageClass.ObjectMeta.Name )
+			if ctrl.provisionerName == storageClass.Provisioner {
+				//storageClass for the actual provisioner
+				persistentVolumeList, err := ctrl.client.CoreV1().PersistentVolumes().List(context.TODO(), metav1.ListOptions{})
+				if err != nil {
+					panic(err.Error())
+				}
+				for index, persistentVolume := range persistentVolumeList.Items {
+					fmt.Printf("persistentVolume: %d Name: %s", index, persistentVolume.Name)
+					fmt.Printf("persistentVolume: %d Name: %s", index, persistentVolume.Spec.StorageClassName)
+					if persistentVolume.Spec.StorageClassName == storageClass.ObjectMeta.Name {
+						fmt.Printf("now we should start sync - persistentVolume: %d path: %s", index, persistentVolume.Spec.NFS.Path)
+					}
+				}
+			}
 		}
 		pods, err := ctrl.client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
 			panic(err.Error())
 		}
 		klog.Infof("csi-raid provisioner: There are %d pods in the cluster\n", len(pods.Items))
+		pvs, err := ctrl.client.CoreV1().PersistentVolumes().List(context.TODO(), metav1.ListOptions{})
+		klog.Infof("csi-raid provisioner: There are %d persistentVolumes in the cluster\n", len(pvs.Items))
 
 
 		//ctrl.provisioner.server
