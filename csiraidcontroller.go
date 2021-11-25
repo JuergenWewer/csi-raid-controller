@@ -865,10 +865,9 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 					panic(err.Error())
 				}
 				for index, persistentVolume := range persistentVolumeList.Items {
-					fmt.Printf("persistentVolume: %d Name: %s", index, persistentVolume.Name)
-					fmt.Printf("persistentVolume: %d Name: %s", index, persistentVolume.Spec.StorageClassName)
+					fmt.Printf("persistentVolume: %d Name: %s StorageClassName: %s\n", index, persistentVolume.Name, persistentVolume.Spec.StorageClassName)
 					if persistentVolume.Spec.StorageClassName == storageClass.ObjectMeta.Name {
-						fmt.Printf("now we should start sync - persistentVolume: %d path: %s", index, persistentVolume.Spec.NFS.Path)
+						fmt.Printf("now we should start sync - persistentVolume: %d path: %s\n", index, persistentVolume.Spec.NFS.Path)
 					}
 				}
 			}
