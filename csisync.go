@@ -6,6 +6,7 @@ import (
 	//"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
 	"github.com/rclone/rclone/fs/sync"
+	"strings"
 
 	//"github.com/rclone/rclone/fs/config"
 	//"github.com/rclone/rclone/fs/fspath"
@@ -144,6 +145,16 @@ func newFsDirFromVolume(ctx context.Context, remote string, directory string) fs
 	path, _ := config.Data().GetValue(remote,"path")
 	fmt.Printf("newFsDir - config.Data().GetValue(remote,\"path\"): %s \n", path)
 	config.Data().GetValue(remote,"path")
+	parts := strings.Split(directory, "/")
+	var relDirectory string
+	if len(parts) >= 1 {
+		fmt.Printf("length: %d\n", len(parts))
+		fmt.Printf("last element: %s\n", parts[len(parts)-1])
+		relDirectory = parts[len(parts)-1]
+	} else {
+		relDirectory = directory
+	}
+
 	//fsInfo, configName, fsPath, config, err := fs.ConfigFs(remote)
 	//fmt.Printf("newFsDir - fs.ConfigFs - fsInfo: %s \n", fsInfo.Name)
 	//fmt.Printf("newFsDir - fs.ConfigFs - configName: %s \n", configName)
@@ -151,7 +162,7 @@ func newFsDirFromVolume(ctx context.Context, remote string, directory string) fs
 	//res, _ := config.Get("user")
 	//fmt.Printf("newFsDir - fs.ConfigFs - config: %s \n", res)
 
-	fsource, err := fs.NewFs(context.Background(),remote +":"+path)
+	fsource, err := fs.NewFs(context.Background(),remote +":"+path + "/" + relDirectory)
 	if err != nil {
 		err = fs.CountError(err)
 		fmt.Printf("fs.NewFs Failed to create file system for %q: %v \n", remote, err)
