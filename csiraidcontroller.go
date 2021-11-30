@@ -853,11 +853,11 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 			panic(err.Error())
 		}
 		fmt.Printf("my name: %s \n", ctrl.provisionerName)
-		fmt.Printf("storageClasses: %d \n", len(storageClassList.Items))
-		for index, storageClass := range storageClassList.Items {
+		//fmt.Printf("storageClasses: %d \n", len(storageClassList.Items))
+		for _, storageClass := range storageClassList.Items {
 			// index is the index where we are
 			// element is the element from someSlice for where we are
-			fmt.Printf("storageClass: %d provisioner: %s storageClass: %s \n", index, storageClass.Provisioner, storageClass.ObjectMeta.Name )
+			//fmt.Printf("storageClass: %d provisioner: %s storageClass: %s \n", index, storageClass.Provisioner, storageClass.ObjectMeta.Name )
 			if ctrl.provisionerName == storageClass.Provisioner {
 				//storageClass for the actual provisioner
 				persistentVolumeList, err := ctrl.client.CoreV1().PersistentVolumes().List(context.TODO(), metav1.ListOptions{})
@@ -871,7 +871,7 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 							//storage type NFS
 							Source = ctrl.provisioner.GetSource()
 							Target = ctrl.provisioner.GetTarget()
-							fmt.Printf("now we should start sync - persistentVolume: %d path: %s\n", index, persistentVolume.Spec.NFS.Path)
+							fmt.Printf("start sync - persistentVolume: %d path: %s\n", index, persistentVolume.Spec.NFS.Path)
 							//now we should start sync - persistentVolume: 5 path: /mnt/optimal/nfs-provisioner/default-test-csi-claim-pvc-3913b8ca-d2f1-472a-8082-16b6e4d5b175
 							go csisyncVolume(ctx, Source, Target, persistentVolume.Spec.NFS.Path)
 						}
@@ -1153,12 +1153,6 @@ func (ctrl *ProvisionController) syncClaim(ctx context.Context, obj interface{})
 			switch err {
 			case nil:
 				klog.V(5).Infof("Claim processing succeeded, removing PVC %s from claims in progress", claim.UID)
-				//pvName := ctrl.getProvisionedVolumeNameForClaim(claim)
-				//ctrl.provisioner.server
-				//ctrl.provisioner.path
-				//csisync(ctx,"./sourcetest", "remotetest:/mnt")
-				//remotePath = ctrl.provisioner.GetRemote()
-
 			case errStopProvision:
 				klog.V(5).Infof("Stop provisioning, removing PVC %s from claims in progress", claim.UID)
 				// Our caller would requeue if we pass on this special error; return nil instead.
@@ -1525,6 +1519,7 @@ func (ctrl *ProvisionController) deleteVolumeOperation(ctx context.Context, volu
 	}
 
 	klog.Info(logOperation(operation, "volume deleted"))
+	go csidelete(ctx, Source, Target, volume)
 
 	// Delete the volume
 	if err = ctrl.client.CoreV1().PersistentVolumes().Delete(ctx, volume.Name, metav1.DeleteOptions{}); err != nil {

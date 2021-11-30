@@ -6,6 +6,7 @@ import (
 	//"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
 	"github.com/rclone/rclone/fs/sync"
+	v1 "k8s.io/api/core/v1"
 	"strings"
 
 	//"github.com/rclone/rclone/fs/config"
@@ -64,12 +65,13 @@ func csisync(ctx context.Context, source string, target string, directory string
 	//fmt.Printf("target entries: %s", entries)
 	ticker := time.NewTicker(1 * time.Second)
 	for _ = range ticker.C {
-		fmt.Println("tock")
+		fmt.Printf("tock for %s\n",fsrc)
 		err1 := sync.Sync(context.Background(), fdst, fsrc, true)
+		sync.MoveDir(context.Background(),nil, fsrc,true,false)
 		if err1 != nil {
 			log.Fatal(err1)
 		}
-		fmt.Println("sync done")
+		fmt.Println("sync done for new claim: %s \n", fsrc)
 	}
 }
 
@@ -109,13 +111,31 @@ func csisyncVolume(ctx context.Context, source string, target string, directory 
 	//fmt.Printf("target entries: %s", entries)
 	ticker := time.NewTicker(1 * time.Second)
 	for _ = range ticker.C {
-		fmt.Println("tock")
-		err1 := sync.Sync(context.Background(), fdst, fsrc, true)
+		fmt.Printf("tock for: %s\n",fsrc)
+		err1 := sync.Sync(context.Background(), fdst, fsrc, false)
 		if err1 != nil {
 			log.Fatal(err1)
 		}
-		fmt.Println("sync done")
+		fmt.Printf("sync done for volume: %s \n", fsrc)
 	}
+}
+func csidelete(ctx context.Context, source string, target string, volume *v1.PersistentVolume) {
+	fmt.Printf("csidelete called source: %s, target: %s, path: %s \n", source, target, volume.Spec.NFS.Path)
+
+	if len(source) == 0 {
+		return
+	}
+	if len(target) == 0 {
+		return
+	}
+
+	configfile.Install()
+	config.SetConfigPath("/csiraid.config")
+	var fsrc fs.Fs
+	fsrc = newFsDirFromVolume(ctx, source, volume.Spec.NFS.Path)
+
+	sync.MoveDir(context.Background(),nil, fsrc,true,false)
+
 }
 
 func NewFsFile(remote string) (fs.Fs, string) {
