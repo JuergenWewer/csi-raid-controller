@@ -5,8 +5,11 @@ import (
 	//"fmt"
 	//"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
+	"github.com/rclone/rclone/fs/operations"
+	_ "github.com/rclone/rclone/fs/operations"
 	"github.com/rclone/rclone/fs/sync"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog/v2"
 	"strings"
 
 	//"github.com/rclone/rclone/fs/config"
@@ -67,11 +70,10 @@ func csisync(ctx context.Context, source string, target string, directory string
 	for _ = range ticker.C {
 		fmt.Printf("tock for %s\n",fsrc)
 		err1 := sync.Sync(context.Background(), fdst, fsrc, true)
-		sync.MoveDir(context.Background(),nil, fsrc,true,false)
 		if err1 != nil {
-			log.Fatal(err1)
+			klog.Info("Failed to sync fsrc: " + fsrc.String())
 		}
-		fmt.Println("sync done for new claim: %s \n", fsrc)
+		fmt.Printf("sync done for new claim: %s \n", fsrc)
 	}
 }
 
@@ -114,7 +116,7 @@ func csisyncVolume(ctx context.Context, source string, target string, directory 
 		fmt.Printf("tock for: %s\n",fsrc)
 		err1 := sync.Sync(context.Background(), fdst, fsrc, false)
 		if err1 != nil {
-			log.Fatal(err1)
+			klog.Info("Failed to sync (volume) fsrc: " + fsrc.String())
 		}
 		fmt.Printf("sync done for volume: %s \n", fsrc)
 	}
@@ -132,10 +134,13 @@ func csidelete(ctx context.Context, source string, target string, volume *v1.Per
 	configfile.Install()
 	config.SetConfigPath("/csiraid.config")
 	var fsrc fs.Fs
-	fsrc = newFsDirFromVolume(ctx, source, volume.Spec.NFS.Path)
+	fsrc = newFsDirFromVolume(ctx, target, volume.Spec.NFS.Path)
 
-	sync.MoveDir(context.Background(),nil, fsrc,true,false)
-
+	fmt.Printf("delete fsrc: %s \n", fsrc)
+	err := operations.Purge(context.Background(), fsrc, "")
+	if err != nil {
+		klog.Info("Failed to delete fsrc: " + fsrc.String())
+	}
 }
 
 func NewFsFile(remote string) (fs.Fs, string) {
@@ -201,8 +206,8 @@ func newFsDirFromVolume(ctx context.Context, remote string, directory string) fs
 }
 
 func newFsDir(ctx context.Context, remote string, directory string, namespace string, name string) fs.Fs {
-	fmt.Printf("newFsDir - config.GetConfigPath(): %s \n", config.GetConfigPath())
-	fmt.Printf("newFsDir - config.Data().GetSectionList(): %s \n", config.Data().GetSectionList())
+	//fmt.Printf("newFsDir - config.GetConfigPath(): %s \n", config.GetConfigPath())
+	//fmt.Printf("newFsDir - config.Data().GetSectionList(): %s \n", config.Data().GetSectionList())
 	path, _ := config.Data().GetValue(remote,"path")
 	fmt.Printf("newFsDir - config.Data().GetValue(remote,\"path\"): %s \n", path)
 	config.Data().GetValue(remote,"path")
