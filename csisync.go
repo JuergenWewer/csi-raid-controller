@@ -32,7 +32,7 @@ import (
 	"github.com/rclone/rclone/fs/config/configfile"
 )
 
-func csisync(ctx context.Context, source string, target string, directory string, namespace string, name string) {
+func csisyncNew(ctx context.Context, source string, target string, directory string, namespace string, name string) {
 	fmt.Printf("csisync called source: %s, target: %s, directory: %s \n", source, target, directory)
 
 	if len(source) == 0 {
@@ -66,15 +66,7 @@ func csisync(ctx context.Context, source string, target string, directory string
 	//	log.Fatal(err)
 	//}
 	//fmt.Printf("target entries: %s", entries)
-	ticker := time.NewTicker(1 * time.Second)
-	for _ = range ticker.C {
-		fmt.Printf("tock for %s\n",fsrc)
-		err1 := sync.Sync(context.Background(), fdst, fsrc, true)
-		if err1 != nil {
-			klog.Info("Failed to sync fsrc: " + fsrc.String())
-		}
-		fmt.Printf("sync done for new claim: %s \n", fsrc)
-	}
+	csisync(ctx, fsrc, fdst)
 }
 
 func csisyncVolume(ctx context.Context, source string, target string, directory string) {
@@ -111,16 +103,57 @@ func csisyncVolume(ctx context.Context, source string, target string, directory 
 	//	log.Fatal(err)
 	//}
 	//fmt.Printf("target entries: %s", entries)
+	csisync(ctx, fsrc, fdst)
+}
+
+func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs) {
+
 	ticker := time.NewTicker(1 * time.Second)
+	var tickerRunning bool
+	tickerRunning = true
 	for _ = range ticker.C {
-		fmt.Printf("tock for: %s\n",fsrc)
-		err1 := sync.Sync(context.Background(), fdst, fsrc, false)
-		if err1 != nil {
-			klog.Info("Failed to sync (volume) fsrc: " + fsrc.String())
+		fmt.Printf("tock for: %s\n", fsrc)
+		entriesSource, errs := fsrc.List(context.Background(), "")
+		if errs != nil {
+			klog.Info(errs)
 		}
-		fmt.Printf("sync done for volume: %s \n", fsrc)
+		entriesDest, errd := fdst.List(context.Background(), "")
+		if errd != nil {
+			klog.Info(errd)
+		}
+		fmt.Printf("Source entries: %s Destination entries: %s \n", entriesSource, entriesDest)
+		//check if sync have to be stopped
+		if entriesSource.Len() == 0 && entriesDest.Len() == 0 {
+			fmt.Printf("SYNCHRONISATION will be stopped\n")
+			tickerRunning = false
+			ticker.Stop()
+		}
+		//check if recovery is neccesssary
+		if entriesSource.Len() == 0 && entriesDest.Len() > 0 {
+			fmt.Printf("RECOVERY is starting\n")
+			tickerRunning = false
+			err1 := sync.Sync(context.Background(), fsrc,fdst, false)
+			tickerRunning = true
+			if err1 != nil {
+				klog.Info("Failed to RECOVERY: " + fdst.String())
+			}
+			fmt.Printf("RECOVERY done for volume: %s \n", fdst)
+		}
+
+		if tickerRunning {
+			fmt.Printf("sync starting for volume: %s \n", fsrc)
+			err1 := sync.Sync(context.Background(), fdst, fsrc, false)
+			if err1 != nil {
+				klog.Info("Failed to sync fsrc: " + fsrc.String())
+			}
+			fmt.Printf("sync done for volume: %s \n", fsrc)
+		} else {
+			fmt.Printf("tickerRunning is false for %s \n", fsrc)
+		}
 	}
 }
+
+
 func csidelete(ctx context.Context, source string, target string, volume *v1.PersistentVolume) {
 	fmt.Printf("csidelete called source: %s, target: %s, path: %s \n", source, target, volume.Spec.NFS.Path)
 
