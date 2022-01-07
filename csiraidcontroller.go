@@ -873,7 +873,7 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 							Target = ctrl.provisioner.GetTarget()
 							fmt.Printf("start sync - persistentVolume: %d path: %s\n", index, persistentVolume.Spec.NFS.Path)
 							//now we should start sync - persistentVolume: 5 path: /mnt/optimal/nfs-provisioner/default-test-csi-claim-pvc-3913b8ca-d2f1-472a-8082-16b6e4d5b175
-							go csisyncVolume(ctx, Source, Target, persistentVolume.Spec.NFS.Path)
+							go CSIsyncVolume(ctx, Source, Target, persistentVolume.Spec.NFS.Path)
 						}
 					}
 				}
@@ -888,9 +888,6 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 		klog.Infof("csi-raid provisioner: There are %d persistentVolumes in the cluster\n", len(pvs.Items))
 
 
-		//ctrl.provisioner.server
-		//ctrl.provisioner.path
-		//csisync(ctx,"./sourcetest", "remotetest:/mnt")
 		Source = ctrl.provisioner.GetSource()
 		Target = ctrl.provisioner.GetTarget()
 		//remotePath = ctrl.provisioner.GetRemote()
@@ -1435,6 +1432,7 @@ func (ctrl *ProvisionController) provisionClaimOperation(ctx context.Context, cl
 
 	ctrl.eventRecorder.Event(claim, v1.EventTypeNormal, "Provisioning", fmt.Sprintf("External provisioner is provisioning volume for claim %q", claimToClaimKey(claim)))
 	klog.Info("csi-controller start to create a new volume")
+
 	volume, result, err := ctrl.provisioner.Provision(ctx, options)
 	if err != nil {
 		if ierr, ok := err.(*IgnoredError); ok {
@@ -1487,7 +1485,7 @@ func (ctrl *ProvisionController) provisionClaimOperation(ctx context.Context, cl
 	volume.Spec.StorageClassName = claimClass
 
 	klog.Info(logOperation(operation, "succeeded"))
-	go csisyncNew(ctx, Source, Target, pvName, claim.Namespace ,claim.Name)
+	go CSIsyncNew(ctx, Source, Target, pvName, claim.Namespace ,claim.Name)
 
 	if err := ctrl.volumeStore.StoreVolume(claim, volume); err != nil {
 		return ProvisioningFinished, err
@@ -1519,7 +1517,7 @@ func (ctrl *ProvisionController) deleteVolumeOperation(ctx context.Context, volu
 	}
 
 	klog.Info(logOperation(operation, "volume deleted"))
-	go csidelete(ctx, Source, Target, volume)
+	go CSIdelete(ctx, Source, Target, volume)
 
 	// Delete the volume
 	if err = ctrl.client.CoreV1().PersistentVolumes().Delete(ctx, volume.Name, metav1.DeleteOptions{}); err != nil {

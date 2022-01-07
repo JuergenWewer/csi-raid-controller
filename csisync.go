@@ -27,12 +27,13 @@ import (
 	_ "github.com/rclone/rclone/backend/drive"
 	_ "github.com/rclone/rclone/backend/local"
 	_ "github.com/rclone/rclone/backend/sftp"
+	_ "github.com/rclone/rclone/backend/azureblob"
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
 	"github.com/rclone/rclone/fs/config/configfile"
 )
 
-func csisyncNew(ctx context.Context, source string, target string, directory string, namespace string, name string) {
+func CSIsyncNew(ctx context.Context, source string, target string, directory string, namespace string, name string) {
 	fmt.Printf("csisync called source: %s, target: %s, directory: %s \n", source, target, directory)
 
 	if len(source) == 0 {
@@ -69,7 +70,7 @@ func csisyncNew(ctx context.Context, source string, target string, directory str
 	csisync(ctx, fsrc, fdst)
 }
 
-func csisyncVolume(ctx context.Context, source string, target string, directory string) {
+func CSIsyncVolume(ctx context.Context, source string, target string, directory string) {
 	fmt.Printf("csisync called source: %s, target: %s, directory: %s \n", source, target, directory)
 
 	if len(source) == 0 {
@@ -154,7 +155,7 @@ func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs) {
 }
 
 
-func csidelete(ctx context.Context, source string, target string, volume *v1.PersistentVolume) {
+func CSIdelete(ctx context.Context, source string, target string, volume *v1.PersistentVolume) {
 	fmt.Printf("csidelete called source: %s, target: %s, path: %s \n", source, target, volume.Spec.NFS.Path)
 
 	if len(source) == 0 {
@@ -243,7 +244,7 @@ func newFsDir(ctx context.Context, remote string, directory string, namespace st
 	//fmt.Printf("newFsDir - config.Data().GetSectionList(): %s \n", config.Data().GetSectionList())
 	path, _ := config.Data().GetValue(remote,"path")
 	fmt.Printf("newFsDir - config.Data().GetValue(remote,\"path\"): %s \n", path)
-	config.Data().GetValue(remote,"path")
+	//?config.Data().GetValue(remote,"path")
 	//fsInfo, configName, fsPath, config, err := fs.ConfigFs(remote)
 	//fmt.Printf("newFsDir - fs.ConfigFs - fsInfo: %s \n", fsInfo.Name)
 	//fmt.Printf("newFsDir - fs.ConfigFs - configName: %s \n", configName)
