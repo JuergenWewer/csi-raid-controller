@@ -22,7 +22,7 @@ git checkout master
 git pull
 
 ## create a new branch named as the version
-git checkout -b "v0.0.36"
+git checkout -b "v0.0.37"
 
 ## make the modifications
 ...
@@ -33,16 +33,27 @@ make
 
 ## push the branch to github
 git add .
-git commit -m "release v0.0.36"
-git push --set-upstream origin v0.0.36
+git commit -m "release v0.0.37"
+git push --set-upstream origin v0.0.37
 
 ## merge the release branch back into the master
+
 git checkout master
 git pull
-git merge v0.0.36
+git merge v0.0.37
 git push
 
-# use the csiraidcontroller in other go projects with version v0.0.47
+#Summary:
+git checkout -b "v0.0.37"
+git add .
+git commit -m "release v0.0.37"
+git push --set-upstream origin v0.0.37
+git checkout master
+git pull
+git merge v0.0.37
+git push
+
+# use the csiraidcontroller in other go projects with version v0.0.36
 in the .go file:
 ```
 package main

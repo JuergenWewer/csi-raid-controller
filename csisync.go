@@ -259,7 +259,13 @@ func newFsDir(ctx context.Context, remote string, directory string, namespace st
 	//res, _ := config.Get("user")
 	//fmt.Printf("newFsDir - fs.ConfigFs - config: %s \n", res)
 
-	fsource, err := fs.NewFs(context.Background(),remote +":"+path+"/"+ namespace + "-" + name + "-" +directory)
+	var sourcePath string
+	if (path != "") {
+		sourcePath = remote +":"+path+"/"+ namespace + "-" + name + "-" +directory
+	} else {
+		sourcePath = remote + ":" + directory
+	}
+	fsource, err := fs.NewFs(context.Background(),sourcePath)
 	if err != nil {
 		err = fs.CountError(err)
 		fmt.Printf("fs.NewFs Failed to create file system for %q: %v \n", remote, err)
