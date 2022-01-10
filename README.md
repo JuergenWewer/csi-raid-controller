@@ -22,24 +22,24 @@ git checkout master
 git pull
 
 ## create a new branch named as the version
-git checkout -b "v0.0.47"
+git checkout -b "v0.0.36"
 
 ## make the modifications
 ...
 delete controller
 
-## generate the binary: controller
+## generate the binary: controller - das ist nicht notwendig
 make
 
 ## push the branch to github
 git add .
-git commit -m "release v0.0.47"
-git push --set-upstream origin v0.0.47
+git commit -m "release v0.0.36"
+git push --set-upstream origin v0.0.36
 
 ## merge the release branch back into the master
 git checkout master
 git pull
-git merge v0.0.47
+git merge v0.0.36
 git push
 
 # use the csiraidcontroller in other go projects with version v0.0.47

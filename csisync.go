@@ -156,7 +156,10 @@ func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs) {
 
 
 func CSIdelete(ctx context.Context, source string, target string, volume *v1.PersistentVolume) {
-	fmt.Printf("csidelete called source: %s, target: %s, path: %s \n", source, target, volume.Spec.NFS.Path)
+	fmt.Printf("CSIdelete source: %s, target: %s, volume: %s \n", source, target, volume)
+	if volume.Spec.NFS != nil {
+		fmt.Printf("CSIdelete source: %s, target: %s, path: %s \n", source, target, volume.Spec.NFS.Path)
+	}
 
 	if len(source) == 0 {
 		return
@@ -168,8 +171,11 @@ func CSIdelete(ctx context.Context, source string, target string, volume *v1.Per
 	configfile.Install()
 	config.SetConfigPath("/csiraid.config")
 	var fsrc fs.Fs
-	fsrc = newFsDirFromVolume(ctx, target, volume.Spec.NFS.Path)
-
+	if volume.Spec.NFS != nil {
+		fsrc = newFsDirFromVolume(ctx, target, volume.Spec.NFS.Path)
+	} else {
+		fsrc = newFsDirFromVolume(ctx, target, volume.Name)
+	}
 	fmt.Printf("delete fsrc: %s \n", fsrc)
 	err := operations.Purge(context.Background(), fsrc, "")
 	if err != nil {
@@ -199,10 +205,11 @@ func NewFsFile(remote string) (fs.Fs, string) {
 }
 
 func newFsDirFromVolume(ctx context.Context, remote string, directory string) fs.Fs {
-	fmt.Printf("newFsDir - config.GetConfigPath(): %s \n", config.GetConfigPath())
-	fmt.Printf("newFsDir - config.Data().GetSectionList(): %s \n", config.Data().GetSectionList())
+	fmt.Printf("newFsDirFromVolume remote: %s directory: %s\n", remote, directory)
+	fmt.Printf("newFsDirFromVolume - config.GetConfigPath(): %s \n", config.GetConfigPath())
+	fmt.Printf("newFsDirFromVolume - config.Data().GetSectionList(): %s \n", config.Data().GetSectionList())
 	path, _ := config.Data().GetValue(remote,"path")
-	fmt.Printf("newFsDir - config.Data().GetValue(remote,\"path\"): %s \n", path)
+	fmt.Printf("newFsDirFromVolume - config.Data().GetValue(remote,\"path\"): %s \n", path)
 	config.Data().GetValue(remote,"path")
 	parts := strings.Split(directory, "/")
 	var relDirectory string
@@ -221,7 +228,7 @@ func newFsDirFromVolume(ctx context.Context, remote string, directory string) fs
 	//res, _ := config.Get("user")
 	//fmt.Printf("newFsDir - fs.ConfigFs - config: %s \n", res)
 
-	fsource, err := fs.NewFs(context.Background(),remote +":"+path + "/" + relDirectory)
+	fsource, err := fs.NewFs(context.Background(), remote+":"+path+"/"+relDirectory)
 	if err != nil {
 		err = fs.CountError(err)
 		fmt.Printf("fs.NewFs Failed to create file system for %q: %v \n", remote, err)
