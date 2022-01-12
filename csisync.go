@@ -24,10 +24,10 @@ import (
 	"path"
 	"time"
 
+	_ "github.com/rclone/rclone/backend/azureblob"
 	_ "github.com/rclone/rclone/backend/drive"
 	_ "github.com/rclone/rclone/backend/local"
 	_ "github.com/rclone/rclone/backend/sftp"
-	_ "github.com/rclone/rclone/backend/azureblob"
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
 	"github.com/rclone/rclone/fs/config/configfile"
@@ -67,7 +67,7 @@ func CSIsyncNew(ctx context.Context, source string, target string, directory str
 	//	log.Fatal(err)
 	//}
 	//fmt.Printf("target entries: %s", entries)
-	csisync(ctx, fsrc, fdst)
+	csisync(ctx, fsrc, fdst, true)
 }
 
 func CSIsyncVolume(ctx context.Context, source string, target string, directory string) {
@@ -104,10 +104,10 @@ func CSIsyncVolume(ctx context.Context, source string, target string, directory 
 	//	log.Fatal(err)
 	//}
 	//fmt.Printf("target entries: %s", entries)
-	csisync(ctx, fsrc, fdst)
+	csisync(ctx, fsrc, fdst, false)
 }
 
-func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs) {
+func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs, new bool) {
 
 	ticker := time.NewTicker(1 * time.Second)
 	var tickerRunning bool
@@ -124,7 +124,7 @@ func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs) {
 		}
 		fmt.Printf("Source entries: %s Destination entries: %s \n", entriesSource, entriesDest)
 		//check if sync have to be stopped
-		if entriesSource.Len() == 0 && entriesDest.Len() == 0 {
+		if (entriesSource.Len() == 0 && entriesDest.Len() == 0) && !new {
 			fmt.Printf("SYNCHRONISATION will be stopped\n")
 			tickerRunning = false
 			ticker.Stop()
