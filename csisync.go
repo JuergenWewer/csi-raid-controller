@@ -109,6 +109,7 @@ func CSIsyncVolume(ctx context.Context, source string, target string, directory 
 
 func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs, new bool) {
 
+	return
 	ticker := time.NewTicker(1 * time.Second)
 	var tickerRunning bool
 	tickerRunning = true

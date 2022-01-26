@@ -22,7 +22,7 @@ git checkout master
 git pull
 
 ## create a new branch named as the version
-git checkout -b "v0.0.37"
+git checkout -b "v0.0.39"
 
 ## make the modifications
 ...
