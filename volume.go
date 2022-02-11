@@ -46,6 +46,7 @@ type Provisioner interface {
 	Delete(context.Context, *v1.PersistentVolume) error
 	GetSource() string
 	GetTarget() string
+	GetActive() bool
 }
 
 // Qualifier is an optional interface implemented by provisioners to determine

@@ -218,6 +218,7 @@ const (
 var errRuntime = fmt.Errorf("cannot call option functions after controller has Run")
 var Source string
 var Target string
+var Active bool
 
 // ResyncPeriod is how often the controller relists PVCs, PVs, & storage
 // classes. OnUpdate will be called even if nothing has changed, meaning failed
@@ -871,9 +872,10 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 							//storage type NFS
 							Source = ctrl.provisioner.GetSource()
 							Target = ctrl.provisioner.GetTarget()
+							Active = ctrl.provisioner.GetActive()
 							fmt.Printf("start sync - persistentVolume: %d path: %s\n", index, persistentVolume.Spec.NFS.Path)
 							//now we should start sync - persistentVolume: 5 path: /mnt/optimal/nfs-provisioner/default-test-csi-claim-pvc-3913b8ca-d2f1-472a-8082-16b6e4d5b175
-							go CSIsyncVolume(ctx, Source, Target, persistentVolume.Spec.NFS.Path)
+							go CSIsyncVolume(ctx, Source, Target, persistentVolume.Spec.NFS.Path, Active)
 						}
 					}
 				}
@@ -890,8 +892,9 @@ func (ctrl *ProvisionController) Run(ctx context.Context) {
 
 		Source = ctrl.provisioner.GetSource()
 		Target = ctrl.provisioner.GetTarget()
+		Active = ctrl.provisioner.GetActive()
 		//remotePath = ctrl.provisioner.GetRemote()
-		klog.Infof("csi-raid provisioner Source: %s Target: %s", Source, Target)
+		klog.Infof("csi-raid provisioner Source: %s Target: %s Active: %b", Source, Target, Active)
 		defer utilruntime.HandleCrash()
 		defer ctrl.claimQueue.ShutDown()
 		defer ctrl.volumeQueue.ShutDown()
@@ -1485,7 +1488,7 @@ func (ctrl *ProvisionController) provisionClaimOperation(ctx context.Context, cl
 	volume.Spec.StorageClassName = claimClass
 
 	klog.Info(logOperation(operation, "succeeded"))
-	go CSIsyncNew(ctx, Source, Target, pvName, claim.Namespace ,claim.Name)
+	go CSIsyncNew(ctx, Source, Target, pvName, claim.Namespace ,claim.Name, Active)
 
 	if err := ctrl.volumeStore.StoreVolume(claim, volume); err != nil {
 		return ProvisioningFinished, err

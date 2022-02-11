@@ -33,7 +33,7 @@ import (
 	"github.com/rclone/rclone/fs/config/configfile"
 )
 
-func CSIsyncNew(ctx context.Context, source string, target string, directory string, namespace string, name string) {
+func CSIsyncNew(ctx context.Context, source string, target string, directory string, namespace string, name string, active bool) {
 	fmt.Printf("csisync called source: %s, target: %s, directory: %s \n", source, target, directory)
 
 	if len(source) == 0 {
@@ -67,10 +67,10 @@ func CSIsyncNew(ctx context.Context, source string, target string, directory str
 	//	log.Fatal(err)
 	//}
 	//fmt.Printf("target entries: %s", entries)
-	csisync(ctx, fsrc, fdst, true)
+	csisync(ctx, fsrc, fdst, true, active)
 }
 
-func CSIsyncVolume(ctx context.Context, source string, target string, directory string) {
+func CSIsyncVolume(ctx context.Context, source string, target string, directory string, active bool) {
 	fmt.Printf("csisync called source: %s, target: %s, directory: %s \n", source, target, directory)
 
 	if len(source) == 0 {
@@ -104,12 +104,14 @@ func CSIsyncVolume(ctx context.Context, source string, target string, directory 
 	//	log.Fatal(err)
 	//}
 	//fmt.Printf("target entries: %s", entries)
-	csisync(ctx, fsrc, fdst, false)
+	csisync(ctx, fsrc, fdst, false, active)
 }
 
-func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs, new bool) {
+func csisync(ctx context.Context,	fsrc fs.Fs, fdst fs.Fs, new bool, active bool) {
 
-	return
+	if !active {
+		return
+	}
 	ticker := time.NewTicker(1 * time.Second)
 	var tickerRunning bool
 	tickerRunning = true

@@ -33,24 +33,24 @@ make
 
 ## push the branch to github
 git add .
-git commit -m "release v0.0.37"
-git push --set-upstream origin v0.0.37
+git commit -m "release v0.0.39"
+git push --set-upstream origin v0.0.39
 
 ## merge the release branch back into the master
 
 git checkout master
 git pull
-git merge v0.0.37
+git merge v0.0.39
 git push
 
 #Summary:
-git checkout -b "v0.0.38"
+git checkout -b "v0.0.40"
 git add .
-git commit -m "release v0.0.38"
-git push --set-upstream origin v0.0.38
+git commit -m "release v0.0.40"
+git push --set-upstream origin v0.0.40
 git checkout master
 git pull
-git merge v0.0.38
+git merge v0.0.40
 git push
 
 # use the csiraidcontroller in other go projects with version v0.0.36

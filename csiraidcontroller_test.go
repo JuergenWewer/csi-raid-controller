@@ -1048,6 +1048,7 @@ func newTestProvisioner() *testProvisioner {
 		"path",
 		"source",
 		"target",
+		false,
 	}
 }
 
@@ -1091,7 +1092,9 @@ type testProvisioner struct {
 	path   string
 	source string
 	target string
+	active bool
 }
+
 
 var _ Provisioner = &testProvisioner{}
 
@@ -1175,6 +1178,10 @@ func (p *testProvisioner) GetTarget() string {
 	return p.target
 }
 
+func (p *testProvisioner) GetActive() bool {
+	return p.active
+}
+
 func newBadTestProvisioner() Provisioner {
 	return &badTestProvisioner{}
 }
@@ -1187,6 +1194,10 @@ func (p *badTestProvisioner) GetSource() string {
 }
 func (p *badTestProvisioner) GetTarget() string {
 	return ""
+}
+
+func (p *badTestProvisioner) GetActive() bool {
+	return false
 }
 
 var _ Provisioner = &badTestProvisioner{}
@@ -1217,6 +1228,10 @@ func (p *temporaryTestProvisioner) GetTarget() string {
 	return ""
 }
 
+func (p *temporaryTestProvisioner) GetActive() bool {
+	return false
+}
+
 func (p *temporaryTestProvisioner) Provision(ctx context.Context, options ProvisionOptions) (*v1.PersistentVolume, ProvisioningState, error) {
 	return nil, ProvisioningInBackground, errors.New("fake error, in progress")
 }
@@ -1236,6 +1251,10 @@ func (p *rescheduleTestProvisioner) GetSource() string {
 }
 func (p *rescheduleTestProvisioner) GetTarget() string {
 	return ""
+}
+
+func (p *rescheduleTestProvisioner) GetActive() bool {
+	return false
 }
 
 func (p *rescheduleTestProvisioner) Provision(ctx context.Context, options ProvisionOptions) (*v1.PersistentVolume, ProvisioningState, error) {
@@ -1259,6 +1278,10 @@ func (p *noChangeTestProvisioner) GetTarget() string {
 	return ""
 }
 
+func (p *noChangeTestProvisioner) GetActive() bool {
+	return false
+}
+
 func (p *noChangeTestProvisioner) Provision(ctx context.Context, options ProvisionOptions) (*v1.PersistentVolume, ProvisioningState, error) {
 	return nil, ProvisioningNoChange, errors.New("fake error, no change")
 }
@@ -1277,6 +1300,9 @@ func (p *ignoredProvisioner) GetSource() string {
 }
 func (p *ignoredProvisioner) GetTarget() string {
 	return ""
+}
+func (p *ignoredProvisioner) GetActive() bool {
+	return false
 }
 
 func (i *ignoredProvisioner) Provision(ctx context.Context, options ProvisionOptions) (*v1.PersistentVolume, ProvisioningState, error) {
@@ -1319,6 +1345,9 @@ func (p *provisioner) GetSource() string {
 }
 func (p *provisioner) GetTarget() string {
 	return ""
+}
+func (p *provisioner) GetActive() bool {
+	return false
 }
 
 func (m *provisioner) Provision(ctx context.Context, options ProvisionOptions) (*v1.PersistentVolume, ProvisioningState, error) {
